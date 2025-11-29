@@ -1,0 +1,78 @@
+name: Publish to GitHub Packages
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'src/**'
+      - 'build.gradle'
+      - 'gradle.properties'
+  release:
+    types: [created]
+  workflow_dispatch:  # 수동 실행 가능
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      # 1. 소스 체크아웃
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # 2. Java 21 설정
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+
+      # 3. Gradle 캐시
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      # 4. Gradle 빌드 권한
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      # 5. 빌드 및 테스트
+      - name: Build with Gradle
+        run: ./gradlew build
+
+      # 6. GitHub Packages에 배포
+      - name: Publish to GitHub Packages
+        run: ./gradlew publish
+        env:
+          GITHUB_ACTOR: ${{ github.actor }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # 7. 배포 결과 요약
+      - name: Publish Summary
+        run: |
+          echo "## 📦 Published to GitHub Packages" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- **Group:** com.jun-bank" >> $GITHUB_STEP_SUMMARY
+          echo "- **Artifact:** common-lib" >> $GITHUB_STEP_SUMMARY
+          echo "- **Version:** 0.0.1-SNAPSHOT" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Usage in other projects:" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`groovy" >> $GITHUB_STEP_SUMMARY
+          echo "repositories {" >> $GITHUB_STEP_SUMMARY
+          echo "    maven {" >> $GITHUB_STEP_SUMMARY
+          echo "        url = uri(\"https://maven.pkg.github.com/jun-bank/common-lib\")" >> $GITHUB_STEP_SUMMARY
+          echo "        credentials {" >> $GITHUB_STEP_SUMMARY
+          echo "            username = System.getenv(\"GITHUB_ACTOR\")" >> $GITHUB_STEP_SUMMARY
+          echo "            password = System.getenv(\"GITHUB_TOKEN\")" >> $GITHUB_STEP_SUMMARY
+          echo "        }" >> $GITHUB_STEP_SUMMARY
+          echo "    }" >> $GITHUB_STEP_SUMMARY
+          echo "}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "dependencies {" >> $GITHUB_STEP_SUMMARY
+          echo "    implementation 'com.jun-bank:common-lib:0.0.1-SNAPSHOT'" >> $GITHUB_STEP_SUMMARY
+          echo "}" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY

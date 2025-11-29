@@ -1,0 +1,139 @@
+plugins {
+    id 'java-library'
+    id 'org.springframework.boot' version '4.0.0'
+    id 'io.spring.dependency-management' version '1.1.7'
+    id 'maven-publish'
+}
+
+group = 'com.jun-bank'
+version = '0.0.1-SNAPSHOT'
+description = 'Jun-Bank Common Library - 공통 DTO, Exception, Event, Utility'
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
+    withSourcesJar()
+    withJavadocJar()
+}
+
+repositories {
+    mavenCentral()
+}
+
+ext {
+    springCloudVersion = '2025.1.0'
+}
+
+dependencyManagement {
+    imports {
+        mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
+    }
+}
+
+dependencies {
+    // ========================================
+    // Spring Boot Core
+    // ========================================
+    api 'org.springframework.boot:spring-boot-starter-validation'
+    api 'org.springframework.boot:spring-boot-starter-data-jpa'
+
+    // ========================================
+    // Spring Web (API 응답, ExceptionHandler)
+    // ========================================
+    api 'org.springframework:spring-web'
+    api 'org.springframework:spring-webmvc'
+
+    // ========================================
+    // Jackson (JSON 직렬화/역직렬화)
+    // ========================================
+    api 'com.fasterxml.jackson.core:jackson-databind'
+    api 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'
+
+    // ========================================
+    // Kafka (이벤트 기반 통신)
+    // ========================================
+    api 'org.springframework.kafka:spring-kafka'
+
+    // ========================================
+    // Servlet API
+    // ========================================
+    compileOnly 'jakarta.servlet:jakarta.servlet-api'
+
+    // ========================================
+    // Lombok
+    // ========================================
+    compileOnly 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
+
+    // ========================================
+    // Testing
+    // ========================================
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testCompileOnly 'org.projectlombok:lombok'
+    testAnnotationProcessor 'org.projectlombok:lombok'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
+}
+
+// ========================================
+// 라이브러리이므로 bootJar 비활성화, jar 활성화
+// ========================================
+bootJar {
+    enabled = false
+}
+
+jar {
+    enabled = true
+}
+
+// ========================================
+// GitHub Packages 배포 설정
+// ========================================
+publishing {
+    publications {
+        gpr(MavenPublication) {
+            from components.java
+
+            pom {
+                name = 'Jun-Bank Common Library'
+                description = 'Common utilities, DTOs, exceptions, and events for Jun-Bank MSA'
+                url = 'https://github.com/jun-bank/common-lib'
+
+                licenses {
+                    license {
+                        name = 'MIT License'
+                        url = 'https://opensource.org/licenses/MIT'
+                    }
+                }
+
+                developers {
+                    developer {
+                        id = 'junbank'
+                        name = 'Jun Bank Team'
+                    }
+                }
+
+                scm {
+                    connection = 'scm:git:git://github.com/jun-bank/common-lib.git'
+                    developerConnection = 'scm:git:ssh://github.com/jun-bank/common-lib.git'
+                    url = 'https://github.com/jun-bank/common-lib'
+                }
+            }
+        }
+    }
+
+    repositories {
+        maven {
+            name = "GitHubPackages"
+            url = uri("https://maven.pkg.github.com/jun-bank/common-lib")
+            credentials {
+                username = System.getenv("GITHUB_ACTOR") ?: project.findProperty("gpr.user") ?: ""
+                password = System.getenv("GITHUB_TOKEN") ?: project.findProperty("gpr.key") ?: ""
+            }
+        }
+    }
+}
