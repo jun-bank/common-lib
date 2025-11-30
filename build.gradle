@@ -137,3 +137,8 @@ publishing {
         }
     }
 }
+
+tasks.withType(Javadoc) {
+    failOnError = false
+    options.addStringOption('Xdoclint:none', '-quiet')
+}
