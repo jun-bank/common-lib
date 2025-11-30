@@ -31,7 +31,7 @@ jobs:
       # 3. GPG 키 설정
       - name: Import GPG key
         run: |
-          echo "${{ secrets.GPG_PRIVATE_KEY }}" | base64 -d | gpg --batch --import
+          echo "${{ secrets.GPG_PRIVATE_KEY }}" | gpg --batch --import
           gpg --list-keys
 
       # 4. Gradle 캐시
