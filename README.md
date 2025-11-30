@@ -4,6 +4,9 @@ Jun-Bank MSA 프로젝트의 공통 라이브러리입니다.
 
 모든 비즈니스 서비스에서 공유하는 API 응답, 예외 처리, 이벤트, 유틸리티 클래스를 제공합니다.
 
+[![Maven Central](https://img.shields.io/maven-central/v/io.github.jun-bank/common-lib.svg)](https://central.sonatype.com/artifact/io.github.jun-bank/common-lib)
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+
 ---
 
 ## 📦 설치
@@ -13,25 +16,21 @@ Jun-Bank MSA 프로젝트의 공통 라이브러리입니다.
 ```groovy
 repositories {
     mavenCentral()
-    maven {
-        url = uri("https://maven.pkg.github.com/jun-bank/common-lib")
-        credentials {
-            username = System.getenv("GITHUB_ACTOR") ?: project.findProperty("gpr.user") ?: ""
-            password = System.getenv("GITHUB_TOKEN") ?: project.findProperty("gpr.key") ?: ""
-        }
-    }
 }
 
 dependencies {
-    implementation 'com.jun-bank:common-lib:0.0.1-SNAPSHOT'
+    implementation 'io.github.jun-bank:common-lib:0.0.1'
 }
 ```
 
-### 환경 변수
+### Maven
 
-```bash
-export GITHUB_ACTOR=your-github-username
-export GITHUB_TOKEN=your-personal-access-token  # read:packages 권한 필요
+```xml
+<dependency>
+    <groupId>io.github.jun-bank</groupId>
+    <artifactId>common-lib</artifactId>
+    <version>0.0.1</version>
+</dependency>
 ```
 
 ---
@@ -384,19 +383,48 @@ UserDto dto = JsonUtils.convert(entity, UserDto.class);
 
 ## 🚀 배포
 
-main 브랜치 push 시 GitHub Actions로 자동 배포
+### 자동 배포 (GitHub Actions)
+
+main 브랜치에 push 시 자동으로 Maven Central에 배포됩니다.
+
+### 수동 배포
 
 ```bash
-# 수동 배포
-./gradlew publish
+./gradlew publishToMavenCentralPortal
 ```
+
+### 배포 확인
+
+- [Maven Central에서 검색](https://central.sonatype.com/search?q=io.github.jun-bank)
+- [아티팩트 직접 링크](https://central.sonatype.com/artifact/io.github.jun-bank/common-lib)
+
+---
+
+## 🔐 Maven Central 배포 설정
+
+이 라이브러리를 Fork하여 본인의 Maven Central에 배포하려면 [Maven Central 배포 가이드](./MAVEN_CENTRAL_PUBLISH_GUIDE.md)를 참고하세요.
+
+### 필요한 GitHub Secrets
+
+| Secret | 설명 |
+|--------|------|
+| `OSSRH_USERNAME` | Sonatype 토큰 Username |
+| `OSSRH_PASSWORD` | Sonatype 토큰 Password |
+| `GPG_KEY_ID` | GPG 키 ID (8자리) |
+| `GPG_PASSPHRASE` | GPG 비밀번호 |
+| `GPG_PRIVATE_KEY` | GPG 비밀키 (armor 형식) |
+| `MAVEN_CENTRAL_TOKEN` | Base64 인코딩된 `username:password` |
 
 ---
 
 ## 📌 버전
 
-| 버전 | Spring Boot | Java |
-|------|-------------|------|
-| 0.0.1-SNAPSHOT | 4.0.0 | 21 |
+| 버전 | Spring Boot | Java | 배포일 |
+|------|-------------|------|--------|
+| 0.0.1 | 4.0.0 | 21 | 2025-11-30 |
 
 ---
+
+## 📄 라이선스
+
+이 프로젝트는 [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0) 라이선스를 따릅니다.
