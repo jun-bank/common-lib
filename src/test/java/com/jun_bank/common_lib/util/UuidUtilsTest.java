@@ -312,7 +312,7 @@ class UuidUtilsTest {
         void timestampIdSortable() throws InterruptedException {
             // given
             String id1 = UuidUtils.generateTimestampId("TXN");
-            Thread.sleep(10);  // 약간의 시간 차이
+            Thread.sleep(1100);   // 약간의 시간 차이
             String id2 = UuidUtils.generateTimestampId("TXN");
 
             // when - 문자열 정렬
