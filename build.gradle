@@ -99,6 +99,15 @@ publishing {
         mavenJava(MavenPublication) {
             from components.java
 
+            versionMapping {
+                usage('java-api') {
+                    fromResolutionOf('runtimeClasspath')
+                }
+                usage('java-runtime') {
+                    fromResolutionResult()
+                }
+            }
+
             pom {
                 name = 'Jun-Bank Common Library'
                 description = 'Common utilities, DTOs, exceptions, and events for Jun-Bank MSA'
