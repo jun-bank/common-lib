@@ -3,10 +3,11 @@ plugins {
     id 'org.springframework.boot' version '4.0.0'
     id 'io.spring.dependency-management' version '1.1.7'
     id 'maven-publish'
+    id 'signing'
 }
 
-group = 'com.jun-bank'
-version = '0.0.1-SNAPSHOT'
+group = 'io.github.jun-bank'
+version = '0.0.1'
 description = 'Jun-Bank Common Library - 공통 DTO, Exception, Event, Utility'
 
 java {
@@ -91,21 +92,12 @@ jar {
 }
 
 // ========================================
-// GitHub Packages 배포 설정
+// Maven Central 배포 설정
 // ========================================
 publishing {
     publications {
-        gpr(MavenPublication) {
+        mavenJava(MavenPublication) {
             from components.java
-
-            versionMapping {
-                usage('java-api') {
-                    fromResolutionOf('runtimeClasspath')
-                }
-                usage('java-runtime') {
-                    fromResolutionResult()
-                }
-            }
 
             pom {
                 name = 'Jun-Bank Common Library'
@@ -114,21 +106,22 @@ publishing {
 
                 licenses {
                     license {
-                        name = 'MIT License'
-                        url = 'https://opensource.org/licenses/MIT'
+                        name = 'The Apache License, Version 2.0'
+                        url = 'https://www.apache.org/licenses/LICENSE-2.0.txt'
                     }
                 }
 
                 developers {
                     developer {
-                        id = 'junbank'
-                        name = 'Jun Bank Team'
+                        id = 'junhyeong9812'
+                        name = 'Jun'
+                        email = 'pickjog@gmail.com'
                     }
                 }
 
                 scm {
                     connection = 'scm:git:git://github.com/jun-bank/common-lib.git'
-                    developerConnection = 'scm:git:ssh://github.com/jun-bank/common-lib.git'
+                    developerConnection = 'scm:git:ssh://github.com:jun-bank/common-lib.git'
                     url = 'https://github.com/jun-bank/common-lib'
                 }
             }
@@ -137,17 +130,31 @@ publishing {
 
     repositories {
         maven {
-            name = "GitHubPackages"
-            url = uri("https://maven.pkg.github.com/jun-bank/common-lib")
+            name = "OSSRH"
+            url = "https://central.sonatype.com/api/v1/publisher/upload"
             credentials {
-                username = System.getenv("GITHUB_ACTOR") ?: project.findProperty("gpr.user") ?: ""
-                password = System.getenv("GITHUB_TOKEN") ?: project.findProperty("gpr.key") ?: ""
+                username = project.findProperty("ossrhUsername") ?: System.getenv("MAVEN_USERNAME") ?: ""
+                password = project.findProperty("ossrhPassword") ?: System.getenv("MAVEN_PASSWORD") ?: ""
             }
         }
     }
 }
 
+signing {
+    def signingKeyId = project.findProperty("signing.keyId") ?: System.getenv("SIGNING_KEY_ID")
+    def signingPassword = project.findProperty("signing.password") ?: System.getenv("SIGNING_PASSWORD")
+    def signingKey = System.getenv("GPG_PRIVATE_KEY")
+
+    if (signingKey != null) {
+        // GitHub Actions 환경 (인메모리 키 사용)
+        useInMemoryPgpKeys(signingKeyId, new String(Base64.decoder.decode(signingKey)), signingPassword)
+    }
+
+    sign publishing.publications.mavenJava
+}
+
 tasks.withType(Javadoc) {
     failOnError = false
     options.addStringOption('Xdoclint:none', '-quiet')
+    options.encoding = 'UTF-8'
 }
