@@ -37,280 +37,344 @@ import org.springframework.web.servlet.NoHandlerFoundException;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    // ========================================
-    // 비즈니스 예외 처리
-    // ========================================
+  // ========================================
+  // 비즈니스 예외 처리
+  // ========================================
 
-    /**
-     * BusinessException 처리
-     */
-    @ExceptionHandler(BusinessException.class)
-    public ResponseEntity<ApiResponse<Void>> handleBusinessException(
-            HttpServletRequest request,
-            BusinessException e) {
+  /**
+   * BusinessException 처리
+   */
+  @ExceptionHandler(BusinessException.class)
+  public ResponseEntity<ApiResponse<Void>> handleBusinessException(
+      HttpServletRequest request,
+      BusinessException e) {
 
-        ErrorCode errorCode = e.getErrorCode();
-        log.warn("비즈니스 예외 발생: {} - {} (path: {})",
-                errorCode.getCode(), e.getMessage(), request.getRequestURI());
+    ErrorCode errorCode = e.getErrorCode();
+    log.warn("비즈니스 예외 발생: {} - {} (path: {})",
+        errorCode.getCode(), e.getMessage(), request.getRequestURI());
 
-        ApiResponse<Void> response = ApiResponse.error(
-                errorCode.getCode(),
-                e.getMessage(),
-                errorCode.getStatus(),
-                request.getRequestURI()
-        );
+    ApiResponse<Void> response = ApiResponse.error(
+        errorCode.getCode(),
+        e.getMessage(),
+        errorCode.getStatus(),
+        request.getRequestURI()
+    );
 
-        return ResponseEntity.status(errorCode.getStatus()).body(response);
-    }
+    return ResponseEntity.status(errorCode.getStatus()).body(response);
+  }
 
-    // ========================================
-    // Validation 예외 처리
-    // ========================================
+  // ========================================
+  // Validation 예외 처리
+  // ========================================
 
-    /**
-     * @Valid 검증 실패 처리
-     */
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ApiResponse<Void>> handleMethodArgumentNotValid(
-            HttpServletRequest request,
-            MethodArgumentNotValidException e) {
+  /**
+   * @Valid 검증 실패 처리
+   */
+  @ExceptionHandler(MethodArgumentNotValidException.class)
+  public ResponseEntity<ApiResponse<Void>> handleMethodArgumentNotValid(
+      HttpServletRequest request,
+      MethodArgumentNotValidException e) {
 
-        String message = e.getBindingResult()
-                .getAllErrors()
-                .stream()
-                .findFirst()
-                .map(error -> error.getDefaultMessage())
-                .orElse(GlobalErrorCode.INVALID_INPUT_VALUE.getMessage());
+    String message = e.getBindingResult()
+        .getAllErrors()
+        .stream()
+        .findFirst()
+        .map(error -> error.getDefaultMessage())
+        .orElse(GlobalErrorCode.INVALID_INPUT_VALUE.getMessage());
 
-        log.warn("입력값 검증 실패: {} (path: {})", message, request.getRequestURI());
+    log.warn("입력값 검증 실패: {} (path: {})", message, request.getRequestURI());
 
-        ApiResponse<Void> response = ApiResponse.error(
-                GlobalErrorCode.INVALID_INPUT_VALUE.getCode(),
-                message,
-                HttpStatus.BAD_REQUEST.value(),
-                request.getRequestURI()
-        );
+    ApiResponse<Void> response = ApiResponse.error(
+        GlobalErrorCode.INVALID_INPUT_VALUE.getCode(),
+        message,
+        HttpStatus.BAD_REQUEST.value(),
+        request.getRequestURI()
+    );
 
-        return ResponseEntity.badRequest().body(response);
-    }
+    return ResponseEntity.badRequest().body(response);
+  }
 
-    /**
-     * 바인딩 예외 처리 (@ModelAttribute 등)
-     */
-    @ExceptionHandler(BindException.class)
-    public ResponseEntity<ApiResponse<Void>> handleBindException(
-            HttpServletRequest request,
-            BindException e) {
+  /**
+   * 바인딩 예외 처리 (@ModelAttribute 등)
+   */
+  @ExceptionHandler(BindException.class)
+  public ResponseEntity<ApiResponse<Void>> handleBindException(
+      HttpServletRequest request,
+      BindException e) {
 
-        String message = e.getBindingResult()
-                .getAllErrors()
-                .stream()
-                .findFirst()
-                .map(error -> error.getDefaultMessage())
-                .orElse(GlobalErrorCode.INVALID_INPUT_VALUE.getMessage());
+    String message = e.getBindingResult()
+        .getAllErrors()
+        .stream()
+        .findFirst()
+        .map(error -> error.getDefaultMessage())
+        .orElse(GlobalErrorCode.INVALID_INPUT_VALUE.getMessage());
 
-        log.warn("바인딩 실패: {} (path: {})", message, request.getRequestURI());
+    log.warn("바인딩 실패: {} (path: {})", message, request.getRequestURI());
 
-        ApiResponse<Void> response = ApiResponse.error(
-                GlobalErrorCode.INVALID_INPUT_VALUE.getCode(),
-                message,
-                HttpStatus.BAD_REQUEST.value(),
-                request.getRequestURI()
-        );
+    ApiResponse<Void> response = ApiResponse.error(
+        GlobalErrorCode.INVALID_INPUT_VALUE.getCode(),
+        message,
+        HttpStatus.BAD_REQUEST.value(),
+        request.getRequestURI()
+    );
 
-        return ResponseEntity.badRequest().body(response);
-    }
+    return ResponseEntity.badRequest().body(response);
+  }
 
-    // ========================================
-    // 요청 관련 예외 처리
-    // ========================================
+  // ========================================
+  // 요청 관련 예외 처리
+  // ========================================
 
-    /**
-     * JSON 파싱 실패 처리
-     */
-    @ExceptionHandler(HttpMessageNotReadableException.class)
-    public ResponseEntity<ApiResponse<Void>> handleHttpMessageNotReadable(
-            HttpServletRequest request,
-            HttpMessageNotReadableException e) {
+  /**
+   * JSON 파싱 실패 처리
+   */
+  @ExceptionHandler(HttpMessageNotReadableException.class)
+  public ResponseEntity<ApiResponse<Void>> handleHttpMessageNotReadable(
+      HttpServletRequest request,
+      HttpMessageNotReadableException e) {
 
-        log.warn("JSON 파싱 실패: {} (path: {})", e.getMessage(), request.getRequestURI());
+    log.warn("JSON 파싱 실패: {} (path: {})", e.getMessage(), request.getRequestURI());
 
-        ApiResponse<Void> response = ApiResponse.error(
-                GlobalErrorCode.INVALID_JSON_FORMAT.getCode(),
-                GlobalErrorCode.INVALID_JSON_FORMAT.getMessage(),
-                HttpStatus.BAD_REQUEST.value(),
-                request.getRequestURI()
-        );
+    ApiResponse<Void> response = ApiResponse.error(
+        GlobalErrorCode.INVALID_JSON_FORMAT.getCode(),
+        GlobalErrorCode.INVALID_JSON_FORMAT.getMessage(),
+        HttpStatus.BAD_REQUEST.value(),
+        request.getRequestURI()
+    );
 
-        return ResponseEntity.badRequest().body(response);
-    }
+    return ResponseEntity.badRequest().body(response);
+  }
 
-    /**
-     * 필수 파라미터 누락 처리
-     */
-    @ExceptionHandler(MissingServletRequestParameterException.class)
-    public ResponseEntity<ApiResponse<Void>> handleMissingServletRequestParameter(
-            HttpServletRequest request,
-            MissingServletRequestParameterException e) {
+  /**
+   * 필수 파라미터 누락 처리
+   */
+  @ExceptionHandler(MissingServletRequestParameterException.class)
+  public ResponseEntity<ApiResponse<Void>> handleMissingServletRequestParameter(
+      HttpServletRequest request,
+      MissingServletRequestParameterException e) {
 
-        String message = String.format("필수 파라미터 '%s'가 누락되었습니다.", e.getParameterName());
-        log.warn("필수 파라미터 누락: {} (path: {})", e.getParameterName(), request.getRequestURI());
+    String message = String.format("필수 파라미터 '%s'가 누락되었습니다.", e.getParameterName());
+    log.warn("필수 파라미터 누락: {} (path: {})", e.getParameterName(), request.getRequestURI());
 
-        ApiResponse<Void> response = ApiResponse.error(
-                GlobalErrorCode.MISSING_PARAMETER.getCode(),
-                message,
-                HttpStatus.BAD_REQUEST.value(),
-                request.getRequestURI()
-        );
+    ApiResponse<Void> response = ApiResponse.error(
+        GlobalErrorCode.MISSING_PARAMETER.getCode(),
+        message,
+        HttpStatus.BAD_REQUEST.value(),
+        request.getRequestURI()
+    );
 
-        return ResponseEntity.badRequest().body(response);
-    }
+    return ResponseEntity.badRequest().body(response);
+  }
 
-    /**
-     * 파라미터 타입 불일치 처리
-     */
-    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
-    public ResponseEntity<ApiResponse<Void>> handleMethodArgumentTypeMismatch(
-            HttpServletRequest request,
-            MethodArgumentTypeMismatchException e) {
+  /**
+   * 파라미터 타입 불일치 처리
+   */
+  @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+  public ResponseEntity<ApiResponse<Void>> handleMethodArgumentTypeMismatch(
+      HttpServletRequest request,
+      MethodArgumentTypeMismatchException e) {
 
-        String message = String.format("파라미터 '%s'의 타입이 올바르지 않습니다.", e.getName());
-        log.warn("파라미터 타입 불일치: {} (path: {})", e.getName(), request.getRequestURI());
+    String message = String.format("파라미터 '%s'의 타입이 올바르지 않습니다.", e.getName());
+    log.warn("파라미터 타입 불일치: {} (path: {})", e.getName(), request.getRequestURI());
 
-        ApiResponse<Void> response = ApiResponse.error(
-                GlobalErrorCode.INVALID_TYPE_VALUE.getCode(),
-                message,
-                HttpStatus.BAD_REQUEST.value(),
-                request.getRequestURI()
-        );
+    ApiResponse<Void> response = ApiResponse.error(
+        GlobalErrorCode.INVALID_TYPE_VALUE.getCode(),
+        message,
+        HttpStatus.BAD_REQUEST.value(),
+        request.getRequestURI()
+    );
 
-        return ResponseEntity.badRequest().body(response);
-    }
+    return ResponseEntity.badRequest().body(response);
+  }
 
-    /**
-     * 지원하지 않는 HTTP 메소드 처리
-     */
-    @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
-    public ResponseEntity<ApiResponse<Void>> handleHttpRequestMethodNotSupported(
-            HttpServletRequest request,
-            HttpRequestMethodNotSupportedException e) {
+  /**
+   * 지원하지 않는 HTTP 메소드 처리
+   */
+  @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
+  public ResponseEntity<ApiResponse<Void>> handleHttpRequestMethodNotSupported(
+      HttpServletRequest request,
+      HttpRequestMethodNotSupportedException e) {
 
-        log.warn("지원하지 않는 HTTP 메소드: {} {} (path: {})",
-                e.getMethod(), request.getRequestURI(), request.getRequestURI());
+    log.warn("지원하지 않는 HTTP 메소드: {} {} (path: {})",
+        e.getMethod(), request.getRequestURI(), request.getRequestURI());
 
-        ApiResponse<Void> response = ApiResponse.error(
-                GlobalErrorCode.METHOD_NOT_ALLOWED.getCode(),
-                GlobalErrorCode.METHOD_NOT_ALLOWED.getMessage(),
-                HttpStatus.METHOD_NOT_ALLOWED.value(),
-                request.getRequestURI()
-        );
+    ApiResponse<Void> response = ApiResponse.error(
+        GlobalErrorCode.METHOD_NOT_ALLOWED.getCode(),
+        GlobalErrorCode.METHOD_NOT_ALLOWED.getMessage(),
+        HttpStatus.METHOD_NOT_ALLOWED.value(),
+        request.getRequestURI()
+    );
 
-        return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED).body(response);
-    }
+    return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED).body(response);
+  }
 
-    /**
-     * 지원하지 않는 미디어 타입 처리
-     */
-    @ExceptionHandler(HttpMediaTypeNotSupportedException.class)
-    public ResponseEntity<ApiResponse<Void>> handleHttpMediaTypeNotSupported(
-            HttpServletRequest request,
-            HttpMediaTypeNotSupportedException e) {
+  /**
+   * 지원하지 않는 미디어 타입 처리
+   */
+  @ExceptionHandler(HttpMediaTypeNotSupportedException.class)
+  public ResponseEntity<ApiResponse<Void>> handleHttpMediaTypeNotSupported(
+      HttpServletRequest request,
+      HttpMediaTypeNotSupportedException e) {
 
-        log.warn("지원하지 않는 미디어 타입: {} (path: {})",
-                e.getContentType(), request.getRequestURI());
+    log.warn("지원하지 않는 미디어 타입: {} (path: {})",
+        e.getContentType(), request.getRequestURI());
 
-        ApiResponse<Void> response = ApiResponse.error(
-                GlobalErrorCode.UNSUPPORTED_MEDIA_TYPE.getCode(),
-                GlobalErrorCode.UNSUPPORTED_MEDIA_TYPE.getMessage(),
-                HttpStatus.UNSUPPORTED_MEDIA_TYPE.value(),
-                request.getRequestURI()
-        );
+    ApiResponse<Void> response = ApiResponse.error(
+        GlobalErrorCode.UNSUPPORTED_MEDIA_TYPE.getCode(),
+        GlobalErrorCode.UNSUPPORTED_MEDIA_TYPE.getMessage(),
+        HttpStatus.UNSUPPORTED_MEDIA_TYPE.value(),
+        request.getRequestURI()
+    );
 
-        return ResponseEntity.status(HttpStatus.UNSUPPORTED_MEDIA_TYPE).body(response);
-    }
+    return ResponseEntity.status(HttpStatus.UNSUPPORTED_MEDIA_TYPE).body(response);
+  }
 
-    /**
-     * 엔드포인트 없음 처리
-     */
-    @ExceptionHandler(NoHandlerFoundException.class)
-    public ResponseEntity<ApiResponse<Void>> handleNoHandlerFound(
-            HttpServletRequest request,
-            NoHandlerFoundException e) {
+  /**
+   * 엔드포인트 없음 처리
+   */
+  @ExceptionHandler(NoHandlerFoundException.class)
+  public ResponseEntity<ApiResponse<Void>> handleNoHandlerFound(
+      HttpServletRequest request,
+      NoHandlerFoundException e) {
 
-        log.warn("엔드포인트 없음: {} {} (path: {})",
-                e.getHttpMethod(), e.getRequestURL(), request.getRequestURI());
+    log.warn("엔드포인트 없음: {} {} (path: {})",
+        e.getHttpMethod(), e.getRequestURL(), request.getRequestURI());
 
-        ApiResponse<Void> response = ApiResponse.error(
-                GlobalErrorCode.ENDPOINT_NOT_FOUND.getCode(),
-                GlobalErrorCode.ENDPOINT_NOT_FOUND.getMessage(),
-                HttpStatus.NOT_FOUND.value(),
-                request.getRequestURI()
-        );
+    ApiResponse<Void> response = ApiResponse.error(
+        GlobalErrorCode.ENDPOINT_NOT_FOUND.getCode(),
+        GlobalErrorCode.ENDPOINT_NOT_FOUND.getMessage(),
+        HttpStatus.NOT_FOUND.value(),
+        request.getRequestURI()
+    );
 
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
-    }
+    return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+  }
 
-    // ========================================
-    // 기타 예외 처리
-    // ========================================
+  // ========================================
+  // Security 예외 처리
+  // ========================================
 
-    /**
-     * IllegalArgumentException 처리
-     */
-    @ExceptionHandler(IllegalArgumentException.class)
-    public ResponseEntity<ApiResponse<Void>> handleIllegalArgument(
-            HttpServletRequest request,
-            IllegalArgumentException e) {
+  /**
+   * AuthenticationException 처리 (인증 실패 - Filter 레벨에서 위임됨)
+   */
+  @ExceptionHandler(org.springframework.security.core.AuthenticationException.class)
+  public ResponseEntity<ApiResponse<Void>> handleAuthenticationException(
+      HttpServletRequest request,
+      org.springframework.security.core.AuthenticationException e) {
 
-        log.warn("잘못된 인자: {} (path: {})", e.getMessage(), request.getRequestURI());
+    log.warn("인증 실패: {} (path: {})", e.getMessage(), request.getRequestURI());
 
-        ApiResponse<Void> response = ApiResponse.error(
-                GlobalErrorCode.BAD_REQUEST.getCode(),
-                e.getMessage(),
-                HttpStatus.BAD_REQUEST.value(),
-                request.getRequestURI()
-        );
+    ApiResponse<Void> response = ApiResponse.error(
+        GlobalErrorCode.UNAUTHORIZED.getCode(),
+        GlobalErrorCode.UNAUTHORIZED.getMessage(),
+        HttpStatus.UNAUTHORIZED.value(),
+        request.getRequestURI()
+    );
 
-        return ResponseEntity.badRequest().body(response);
-    }
+    return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
+  }
 
-    /**
-     * IllegalStateException 처리
-     */
-    @ExceptionHandler(IllegalStateException.class)
-    public ResponseEntity<ApiResponse<Void>> handleIllegalState(
-            HttpServletRequest request,
-            IllegalStateException e) {
+  /**
+   * AccessDeniedException 처리 (Controller에서 직접 throw하는 경우)
+   */
+  @ExceptionHandler(org.springframework.security.access.AccessDeniedException.class)
+  public ResponseEntity<ApiResponse<Void>> handleAccessDeniedException(
+      HttpServletRequest request,
+      org.springframework.security.access.AccessDeniedException e) {
 
-        log.warn("잘못된 상태: {} (path: {})", e.getMessage(), request.getRequestURI());
+    log.warn("접근 거부: {} (path: {})", e.getMessage(), request.getRequestURI());
 
-        ApiResponse<Void> response = ApiResponse.error(
-                GlobalErrorCode.INVALID_STATE.getCode(),
-                e.getMessage(),
-                HttpStatus.UNPROCESSABLE_ENTITY.value(),
-                request.getRequestURI()
-        );
+    ApiResponse<Void> response = ApiResponse.error(
+        GlobalErrorCode.ACCESS_DENIED.getCode(),
+        e.getMessage(),
+        HttpStatus.FORBIDDEN.value(),
+        request.getRequestURI()
+    );
 
-        return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(response);
-    }
+    return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
+  }
 
-    /**
-     * 모든 미처리 예외 처리 (최후의 방어선)
-     */
-    @ExceptionHandler(Exception.class)
-    public ResponseEntity<ApiResponse<Void>> handleAllExceptions(
-            HttpServletRequest request,
-            Exception e) {
+  /**
+   * AuthorizationDeniedException 처리 (@PreAuthorize 등에서 발생)
+   */
+  @ExceptionHandler(org.springframework.security.authorization.AuthorizationDeniedException.class)
+  public ResponseEntity<ApiResponse<Void>> handleAuthorizationDeniedException(
+      HttpServletRequest request,
+      org.springframework.security.authorization.AuthorizationDeniedException e) {
 
-        log.error("처리되지 않은 예외 발생 (path: {}): ", request.getRequestURI(), e);
+    log.warn("인가 거부: {} (path: {})", e.getMessage(), request.getRequestURI());
 
-        ApiResponse<Void> response = ApiResponse.error(
-                GlobalErrorCode.INTERNAL_SERVER_ERROR.getCode(),
-                GlobalErrorCode.INTERNAL_SERVER_ERROR.getMessage(),
-                HttpStatus.INTERNAL_SERVER_ERROR.value(),
-                request.getRequestURI()
-        );
+    ApiResponse<Void> response = ApiResponse.error(
+        GlobalErrorCode.ACCESS_DENIED.getCode(),
+        "접근 권한이 없습니다.",
+        HttpStatus.FORBIDDEN.value(),
+        request.getRequestURI()
+    );
 
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
-    }
+    return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
+  }
+
+  // ========================================
+  // 기타 예외 처리
+  // ========================================
+
+  /**
+   * IllegalArgumentException 처리
+   */
+  @ExceptionHandler(IllegalArgumentException.class)
+  public ResponseEntity<ApiResponse<Void>> handleIllegalArgument(
+      HttpServletRequest request,
+      IllegalArgumentException e) {
+
+    log.warn("잘못된 인자: {} (path: {})", e.getMessage(), request.getRequestURI());
+
+    ApiResponse<Void> response = ApiResponse.error(
+        GlobalErrorCode.BAD_REQUEST.getCode(),
+        e.getMessage(),
+        HttpStatus.BAD_REQUEST.value(),
+        request.getRequestURI()
+    );
+
+    return ResponseEntity.badRequest().body(response);
+  }
+
+  /**
+   * IllegalStateException 처리
+   */
+  @ExceptionHandler(IllegalStateException.class)
+  public ResponseEntity<ApiResponse<Void>> handleIllegalState(
+      HttpServletRequest request,
+      IllegalStateException e) {
+
+    log.warn("잘못된 상태: {} (path: {})", e.getMessage(), request.getRequestURI());
+
+    ApiResponse<Void> response = ApiResponse.error(
+        GlobalErrorCode.INVALID_STATE.getCode(),
+        e.getMessage(),
+        HttpStatus.UNPROCESSABLE_ENTITY.value(),
+        request.getRequestURI()
+    );
+
+    return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(response);
+  }
+
+  /**
+   * 모든 미처리 예외 처리 (최후의 방어선)
+   */
+  @ExceptionHandler(Exception.class)
+  public ResponseEntity<ApiResponse<Void>> handleAllExceptions(
+      HttpServletRequest request,
+      Exception e) {
+
+    log.error("처리되지 않은 예외 발생 (path: {}): ", request.getRequestURI(), e);
+
+    ApiResponse<Void> response = ApiResponse.error(
+        GlobalErrorCode.INTERNAL_SERVER_ERROR.getCode(),
+        GlobalErrorCode.INTERNAL_SERVER_ERROR.getMessage(),
+        HttpStatus.INTERNAL_SERVER_ERROR.value(),
+        request.getRequestURI()
+    );
+
+    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+  }
 }

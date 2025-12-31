@@ -8,7 +8,7 @@ plugins {
 }
 
 group = 'io.github.jun-bank'
-version = '0.0.1'
+version = '0.0.2'
 description = 'Jun-Bank Common Library - 공통 DTO, Exception, Event, Utility'
 
 java {
@@ -45,6 +45,11 @@ dependencies {
     // ========================================
     api 'org.springframework:spring-web'
     api 'org.springframework:spring-webmvc'
+
+    // ========================================
+    // Spring Security (Security 예외 처리)
+    // ========================================
+    compileOnly 'org.springframework.boot:spring-boot-starter-security'
 
     // ========================================
     // Jackson (JSON 직렬화/역직렬화)
